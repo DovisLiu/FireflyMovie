@@ -5,6 +5,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+// Firefly EXO-only: MPV 入口已禁用，避免缺少 lib-media3-mpvplayer.aar 时崩溃
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -51,6 +53,7 @@ public final class PlayerEngineDialog extends BaseBottomSheetDialog {
 
     @Override
     protected void initView() {
+        binding.mpv.setVisibility(View.GONE);
         setSelected();
         getSelectedView().requestFocus();
     }
@@ -60,7 +63,6 @@ public final class PlayerEngineDialog extends BaseBottomSheetDialog {
         binding.debug.setOnClickListener(this::selectDebug);
         binding.other.setOnClickListener(this::selectOther);
         binding.exo.setOnClickListener(view -> selectEngine(PlayerSetting.ENGINE_EXO));
-        binding.mpv.setOnClickListener(view -> selectEngine(PlayerSetting.ENGINE_MPV));
     }
 
     private void selectDebug(View view) {
@@ -84,13 +86,11 @@ public final class PlayerEngineDialog extends BaseBottomSheetDialog {
     }
 
     private void setSelected() {
-        int engine = getCurrentEngine(player);
-        binding.exo.setSelected(engine == PlayerSetting.ENGINE_EXO);
-        binding.mpv.setSelected(engine == PlayerSetting.ENGINE_MPV);
+        binding.exo.setSelected(true);
     }
 
     private View getSelectedView() {
-        return getCurrentEngine(player) == PlayerSetting.ENGINE_MPV ? binding.mpv : binding.exo;
+        return binding.exo;
     }
 
     private PlaybackActivity getPlaybackActivity() {

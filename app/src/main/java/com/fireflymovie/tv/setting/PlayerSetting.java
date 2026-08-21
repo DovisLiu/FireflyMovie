@@ -18,11 +18,19 @@ public class PlayerSetting {
     private static final int MAX_BACKGROUND = 2;
 
     public static int getEngine() {
-        return Math.clamp(Prefers.getInt("player_engine", ENGINE_EXO), ENGINE_EXO, ENGINE_MPV);
+        int engine = Math.clamp(Prefers.getInt("player_engine", ENGINE_EXO), ENGINE_EXO, ENGINE_MPV);
+        // Firefly EXO-only: 旧设置若保存了 MPV，自动切回 EXO，避免运行时崩溃
+        if (engine == ENGINE_MPV) {
+            Prefers.put("player_engine", ENGINE_EXO);
+            return ENGINE_EXO;
+        }
+        return engine;
     }
 
     public static void putEngine(int engine) {
-        Prefers.put("player_engine", Math.clamp(engine, ENGINE_EXO, ENGINE_MPV));
+        // Firefly EXO-only: 禁止写入 MPV，写入时强制转为 EXO
+        if (engine == ENGINE_MPV) engine = ENGINE_EXO;
+        Prefers.put("player_engine", Math.clamp(engine, ENGINE_EXO, ENGINE_EXO));
         if (isExo() && DecodeSetting.isTunnel()) putRender(RENDER_SURFACE);
     }
 

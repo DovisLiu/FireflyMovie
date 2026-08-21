@@ -47,6 +47,7 @@ public final class PlayerEngineFactory {
     }
 
     private static boolean isMpvReady() {
-        return PlayerSetting.isMpv() && MpvPlayerEngine.isAvailable();
+        // Firefly EXO-only: 当前构建缺少 lib-media3-mpvplayer.aar，禁用 MPV 创建路径
+        return false;
     }
 }
