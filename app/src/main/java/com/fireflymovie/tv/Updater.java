@@ -22,11 +22,13 @@ import java.io.File;
 
 public class Updater implements Download.Callback, UpdateListener {
 
-    private final Download download;
     private UpdateDialog dialog;
+    private String version;          // 目标版本号（来自 JSON 的 name），用于拼接 APK 下载路径
+    private String[] apkUrls;         // 候选下载地址，按优先级排列（Gitee → GitHub）
+    private int apkIndex = 0;         // 当前尝试到第几个下载源
+    private Download download;
 
     private Updater() {
-        this.download = Download.create(getApk(), getFile());
     }
 
     public static Updater create() {
@@ -35,14 +37,6 @@ public class Updater implements Download.Callback, UpdateListener {
 
     private File getFile() {
         return Path.cache("update.apk");
-    }
-
-    private String getJson() {
-        return Github.getJson(BuildConfig.FLAVOR_mode);
-    }
-
-    private String getApk() {
-        return Github.getApk(BuildConfig.FLAVOR_mode + "-" + BuildConfig.FLAVOR_abi);
     }
 
     public Updater force() {
@@ -58,15 +52,31 @@ public class Updater implements Download.Callback, UpdateListener {
 
     private void doInBackground(FragmentActivity activity) {
         try {
-            JSONObject object = new JSONObject(OkHttp.string(getJson()));
+            JSONObject object = fetchJson();
             String name = object.optString("name");
             String desc = object.optString("desc");
             int code = object.optInt("code");
             if (code <= BuildConfig.VERSION_CODE) return;
+            this.version = name;
             App.post(() -> show(activity, name, desc));
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    // 依次尝试各更新源获取版本判定 JSON，任一成功即返回；全部失败则抛出异常
+    private JSONObject fetchJson() throws Exception {
+        String path = Github.jsonPath(BuildConfig.FLAVOR_mode);
+        Exception last = null;
+        for (String host : Github.HOSTS) {
+            try {
+                String content = OkHttp.string(host + path);
+                return new JSONObject(content);
+            } catch (Exception e) {
+                last = e;
+            }
+        }
+        throw last != null ? last : new Exception("update check failed");
     }
 
     private void show(FragmentActivity activity, String version, String desc) {
@@ -77,13 +87,20 @@ public class Updater implements Download.Callback, UpdateListener {
     @Override
     public void onConfirm(View view) {
         view.setEnabled(false);
+        apkIndex = 0;
+        apkUrls = Github.getApkUrls(version, BuildConfig.FLAVOR_mode + "-" + BuildConfig.FLAVOR_abi);
+        startDownload();
+    }
+
+    private void startDownload() {
+        download = Download.create(apkUrls[apkIndex], getFile());
         download.start(this);
     }
 
     @Override
     public void onCancel(View view) {
         Setting.putUpdate(false);
-        download.cancel();
+        if (download != null) download.cancel();
         dismiss();
     }
 
@@ -101,6 +118,12 @@ public class Updater implements Download.Callback, UpdateListener {
 
     @Override
     public void error(String msg) {
+        // 当前下载源失败，自动切换到下一个更新源重试
+        if (apkIndex + 1 < apkUrls.length) {
+            apkIndex++;
+            startDownload();
+            return;
+        }
         Notify.show(msg);
         dismiss();
     }
