@@ -18,6 +18,25 @@ if [ -z "$TAG" ]; then
 fi
 [ -z "$TAG" ] && { echo "无法确定版本 tag"; exit 1; }
 echo "版本 tag: $TAG"
+TAG_VER="${TAG#v}"
+
+# 轮询等待 Release 仓库 apk/ 的版本与 tag 对齐，避免与 FireflyMovie 镜像竞态导致挂错 APK
+META_URL="https://gitee.com/$OWNER/$RELEASE_REPO/raw/fireflymovie/apk/leanback.json?access_token=$TOKEN"
+NAME=""
+for i in $(seq 1 15); do
+  NAME=$(curl -sSL --retry 3 --retry-delay 5 "$META_URL" \
+    | python3 -c "import sys,json;print(json.load(sys.stdin).get('name',''))" 2>/dev/null || true)
+  if [ "$NAME" = "$TAG_VER" ]; then
+    echo "第 $i 次探测：版本匹配 ($NAME == $TAG_VER)"
+    break
+  fi
+  echo "第 $i 次探测：版本未对齐 (JSON name='$NAME', 期望 '$TAG_VER')，等待 Release 镜像追平 ..."
+  sleep 15
+done
+if [ "$NAME" != "$TAG_VER" ]; then
+  echo "超时：Release 仓库 apk/ 版本仍与 tag 不一致，放弃本次以免挂错版本"
+  exit 1
+fi
 
 APKS=(leanback-arm64_v8a.apk leanback-armeabi_v7a.apk mobile-arm64_v8a.apk mobile-armeabi_v7a.apk)
 mkdir -p _apks
