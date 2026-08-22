@@ -113,15 +113,24 @@ export JAVA_HOME="/path/to/your/jdk-21"
 
 ## 下载
 
-安装包托管在兄弟仓库 `Release` 的 `apk/` 目录（不随本仓库分发，避免重复存储）。下方为**相对链接**写法，同一份文本在 GitHub 与 Gitee 会各自指向对应平台的 `Release` 仓库，便于国内 / 境外网络环境分别下载。
+安装包托管在兄弟仓库 [Release](https://github.com/DovisLiu/Release) 的 `apk/` 目录（不随本仓库分发，避免重复存储）。请根据您能稳定访问的网络环境选择对应链接，两侧链接互不串台：
 
-> 本段为相对链接兼容性试纸：请在 GitHub（`github.com/DovisLiu/FireflyMovie`）与 Gitee（`gitee.com/dovisliu/FireflyMovie`）两边页面点击下列链接，确认是否分别跳转到对应平台的 `Release` 仓库下载。
+### GitHub 网络（可访问 GitHub）
 
-| 版本 | 相对链接（单跳 `../`） | 相对链接（双跳 `../../`） |
-|------|----------------------|----------------------|
-| 电视版 64 位 | [leanback-arm64_v8a.apk](../Release/raw/fireflymovie/apk/leanback-arm64_v8a.apk) | [leanback-arm64_v8a.apk](../../Release/raw/fireflymovie/apk/leanback-arm64_v8a.apk) |
-| 电视版 32 位 | [leanback-arteabi_v7a.apk](../Release/raw/fireflymovie/apk/leanback-arteabi_v7a.apk) | [leanback-arteabi_v7a.apk](../../Release/raw/fireflymovie/apk/leanback-arteabi_v7a.apk) |
-| 手机版 64 位 | [mobile-arm64_v8a.apk](../Release/raw/fireflymovie/apk/mobile-arm64_v8a.apk) | [mobile-arm64_v8a.apk](../../Release/raw/fireflymovie/apk/mobile-arm64_v8a.apk) |
-| 手机版 32 位 | [mobile-arteabi_v7a.apk](../Release/raw/fireflymovie/apk/mobile-arteabi_v7a.apk) | [mobile-arteabi_v7a.apk](../../Release/raw/fireflymovie/apk/mobile-arteabi_v7a.apk) |
+| 版本 | 下载链接 |
+|------|----------|
+| 电视版 64 位 | [leanback-arm64_v8a.apk](https://github.com/DovisLiu/Release/raw/fireflymovie/apk/leanback-arm64_v8a.apk) |
+| 电视版 32 位 | [leanback-armeabi_v7a.apk](https://github.com/DovisLiu/Release/raw/fireflymovie/apk/leanback-armeabi_v7a.apk) |
+| 手机版 64 位 | [mobile-arm64_v8a.apk](https://github.com/DovisLiu/Release/raw/fireflymovie/apk/mobile-arm64_v8a.apk) |
+| 手机版 32 位 | [mobile-armeabi_v7a.apk](https://github.com/DovisLiu/Release/raw/fireflymovie/apk/mobile-armeabi_v7a.apk) |
 
-若需要直接访问托管仓库，可前往 `Release` 仓库的 `apk/` 目录手动下载。
+### Gitee 网络（国内 / 仅能访问 Gitee）
+
+| 版本 | 下载链接 |
+|------|----------|
+| 电视版 64 位 | [leanback-arm64_v8a.apk](https://gitee.com/dovisliu/Release/raw/fireflymovie/apk/leanback-arm64_v8a.apk) |
+| 电视版 32 位 | [leanback-armeabi_v7a.apk](https://gitee.com/dovisliu/Release/raw/fireflymovie/apk/leanback-armeabi_v7a.apk) |
+| 手机版 64 位 | [mobile-arm64_v8a.apk](https://gitee.com/dovisliu/Release/raw/fireflymovie/apk/mobile-arm64_v8a.apk) |
+| 手机版 32 位 | [mobile-armeabi_v7a.apk](https://gitee.com/dovisliu/Release/raw/fireflymovie/apk/mobile-armeabi_v7a.apk) |
+
+各链接直接指向 `Release` 仓库 `apk/` 目录下的对应文件；GitHub 用户点上方、Gitee 用户点下方。
