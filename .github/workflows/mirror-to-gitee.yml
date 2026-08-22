@@ -3,18 +3,10 @@ name: Mirror to Gitee
 on:
   push:
   delete:
-  release:
-    types: [published, edited]
   workflow_dispatch:
-    inputs:
-      tag:
-        description: '要同步到 Gitee 的发行版 tag（手动触发时使用）'
-        required: false
-        default: 'v1.0.1'
 
 jobs:
   mirror:
-    if: github.event_name == 'push' || github.event_name == 'delete'
     runs-on: ubuntu-latest
     steps:
       - name: Mirror repository to Gitee via PAT
@@ -31,78 +23,3 @@ jobs:
           cd /tmp/mirror-repo
           git remote set-url --push origin "$DST"
           git push --mirror
-
-  sync-releases:
-    if: github.event_name == 'release' || github.event_name == 'workflow_dispatch'
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-    steps:
-      - name: Resolve tag name
-        id: tag
-        run: |
-          TAG="${{ github.event.release.tag_name || github.event.inputs.tag }}"
-          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
-
-      - name: Download GitHub Release assets
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          TAG="${{ steps.tag.outputs.tag }}"
-          echo "Downloading GitHub Release assets for tag: $TAG"
-          rm -rf /tmp/apks && mkdir -p /tmp/apks
-          gh release download "$TAG" -R "$GITHUB_REPOSITORY" -D /tmp/apks
-          echo "Downloaded files:"
-          ls -lh /tmp/apks
-
-      - name: Sync release to Gitee
-        env:
-          GITEE_TOKEN: ${{ secrets.GITEE_TOKEN }}
-        run: |
-          set -e
-          TAG="${{ steps.tag.outputs.tag }}"
-          GITEE_REPO="dovisliu/${{ github.event.repository.name }}"
-          API="https://gitee.com/api/v5/repos/${GITEE_REPO}"
-          TOKEN="access_token=${GITEE_TOKEN}"
-
-          # 查找 Gitee 是否已存在该 tag 的发行版
-          REL_ID=$(curl -s "${API}/releases?${TOKEN}" | jq -r --arg t "$TAG" '.[]? | select(.tag_name==$t) | .id' | head -1)
-          if [ -z "$REL_ID" ]; then
-            echo "Gitee 无该发行版，创建新发行版（target_commitish=main）"
-            BODY="同步自 GitHub Releases：${TAG}"
-            REL_ID=$(curl -s -X POST "${API}/releases?${TOKEN}" \
-              -H "Content-Type: application/json" \
-              -d "{\"tag_name\":\"${TAG}\",\"name\":\"${TAG}\",\"body\":\"${BODY}\",\"target_commitish\":\"main\",\"prerelease\":false}" \
-              | jq -r '.id')
-          else
-            echo "Gitee 已存在发行版 id=${REL_ID}，复用"
-          fi
-          echo "Gitee release id: ${REL_ID}"
-
-          # 逐个上传附件（同名覆盖，幂等）；每个文件加超时与重试，避免无限挂起
-          for f in /tmp/apks/*; do
-            NAME="$(basename "$f")"
-            SIZE="$(du -h "$f" | cut -f1)"
-            echo "Uploading ${NAME} (${SIZE})"
-            OK=0
-            for attempt in 1 2 3; do
-              echo "  attempt ${attempt}"
-              HTTP=$(curl -sS --connect-timeout 30 --max-time 540 --retry 2 --retry-delay 10 \
-                -w "%{http_code}" \
-                -X POST "${API}/releases/${REL_ID}/attach_files?${TOKEN}" \
-                -F "file=@${f}")
-              echo "  -> HTTP ${HTTP}"
-              if [ "$HTTP" = "200" ] || [ "$HTTP" = "201" ]; then
-                echo "  OK"
-                OK=1
-                break
-              fi
-              echo "  retry after backoff"
-              sleep 5
-            done
-            if [ "$OK" -ne 1 ]; then
-              echo "::error::上传 ${NAME} 失败（Gitee 接口超时或拒绝）"
-              exit 1
-            fi
-          done
-          echo "All assets synced."
