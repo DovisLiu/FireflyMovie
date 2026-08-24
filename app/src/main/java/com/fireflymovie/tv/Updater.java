@@ -24,7 +24,7 @@ public class Updater implements Download.Callback, UpdateListener {
 
     private UpdateDialog dialog;
     private String version;          // 目标版本号（来自 JSON 的 name），用于拼接 APK 下载路径
-    private String[] apkUrls;         // 候选下载地址，按优先级排列（Gitee → GitHub）
+    private String[] apkUrls;         // 候选下载地址，按优先级排列（GitHub → Gitee）
     private int apkIndex = 0;         // 当前尝试到第几个下载源
     private Download download;
 
