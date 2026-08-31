@@ -112,6 +112,9 @@ public class CollectActivity extends BaseActivity {
             mAdapter.add(Collect.create(result.getList()));
             mBinding.pager.getAdapter().notifyDataSetChanged();
         });
+        mViewModel.getSearchFailed().observe(this, failed -> {
+            if (Boolean.TRUE.equals(failed)) mBinding.result.setText(R.string.search_all_failed);
+        });
     }
 
     private void saveKeyword() {

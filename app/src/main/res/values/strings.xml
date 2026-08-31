@@ -320,6 +320,7 @@
     <string name="search_record">History</string>
     <string name="search_suggest">Suggest</string>
     <string name="search_hot">Hot</string>
+    <string name="search_all_failed">No site responded. Please check your network or configuration.</string>
 
     <!-- Dialog -->
     <string name="dialog_edit">Edit</string>

@@ -26,10 +26,11 @@ final class ViewModelSearchRunner {
         epoch = new AtomicInteger(0);
     }
 
-    void start(List<Site> sites, Function<Site, Callable<Result>> taskFactory, Consumer<Result> onResult) {
+    void start(List<Site> sites, Function<Site, Callable<Result>> taskFactory, Consumer<Result> onResult, Runnable onAllFailed) {
         int current = nextEpoch();
         cancelFutures();
-        sites.forEach(site -> execute(taskFactory.apply(site), current, onResult));
+        Progress progress = new Progress(sites.size());
+        sites.forEach(site -> execute(taskFactory.apply(site), current, onResult, progress, onAllFailed));
     }
 
     void stop() {
@@ -46,13 +47,42 @@ final class ViewModelSearchRunner {
         futures.clear();
     }
 
-    private void execute(Callable<Result> callable, int current, Consumer<Result> onResult) {
+    private void execute(Callable<Result> callable, int current, Consumer<Result> onResult, Progress progress, Runnable onAllFailed) {
         FluentFuture<Result> future = FluentFuture.from(Task.largeExecutor().submit(callable)).withTimeout(Constant.TIMEOUT_SEARCH, TimeUnit.MILLISECONDS, Task.scheduler());
         futures.add(future);
         future.addCallback(Task.callback(
                 result -> {
-                    if (epoch.get() == current) onResult.accept(result);
+                    if (epoch.get() != current) return;
+                    progress.success();
+                    onResult.accept(result);
+                    progress.finish(onAllFailed);
+                },
+                error -> {
+                    if (epoch.get() != current) return;
+                    error.printStackTrace();
+                    progress.finish(onAllFailed);
                 }
         ), MoreExecutors.directExecutor());
+    }
+
+    private static final class Progress {
+
+        private final AtomicInteger finished;
+        private final AtomicInteger succeeded;
+        private final int total;
+
+        private Progress(int total) {
+            this.total = total;
+            this.finished = new AtomicInteger(0);
+            this.succeeded = new AtomicInteger(0);
+        }
+
+        private void success() {
+            succeeded.incrementAndGet();
+        }
+
+        private void finish(Runnable onAllFailed) {
+            if (finished.incrementAndGet() == total && succeeded.get() == 0) onAllFailed.run();
+        }
     }
 }

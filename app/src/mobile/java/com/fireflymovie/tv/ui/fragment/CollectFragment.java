@@ -16,6 +16,7 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.viewbinding.ViewBinding;
 
+import com.fireflymovie.tv.R;
 import com.fireflymovie.tv.api.config.VodConfig;
 import com.fireflymovie.tv.bean.Collect;
 import com.fireflymovie.tv.bean.Result;
@@ -29,6 +30,7 @@ import com.fireflymovie.tv.ui.adapter.CollectAdapter;
 import com.fireflymovie.tv.ui.adapter.SearchAdapter;
 import com.fireflymovie.tv.ui.base.BaseFragment;
 import com.fireflymovie.tv.ui.custom.CustomScroller;
+import com.fireflymovie.tv.utils.Notify;
 import com.fireflymovie.tv.utils.ResUtil;
 
 import java.util.List;
@@ -103,6 +105,9 @@ public class CollectFragment extends BaseFragment implements MenuProvider, Colle
         mViewModel = new ViewModelProvider(this).get(SiteViewModel.class).init();
         mViewModel.getSearch().observe(this, this::setCollect);
         mViewModel.getResult().observe(this, this::setSearch);
+        mViewModel.getSearchFailed().observe(this, failed -> {
+            if (Boolean.TRUE.equals(failed)) Notify.show(R.string.search_all_failed);
+        });
     }
 
     private void setSites() {

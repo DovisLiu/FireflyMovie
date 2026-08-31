@@ -21,6 +21,7 @@ public class SiteViewModel extends ViewModel {
     private final MutableLiveData<Result> result;
     private final MutableLiveData<Result> search;
     private final MutableLiveData<Result> action;
+    private final MutableLiveData<Boolean> searchFailed;
 
     private final ViewModelTaskRunner<TaskType> tasks;
     private final ViewModelSearchRunner searches;
@@ -29,6 +30,7 @@ public class SiteViewModel extends ViewModel {
         result = new MutableLiveData<>();
         search = new MutableLiveData<>();
         action = new MutableLiveData<>();
+        searchFailed = new MutableLiveData<>();
         tasks = new ViewModelTaskRunner<>(TaskType.class);
         searches = new ViewModelSearchRunner();
     }
@@ -45,10 +47,15 @@ public class SiteViewModel extends ViewModel {
         return action;
     }
 
+    public LiveData<Boolean> getSearchFailed() {
+        return searchFailed;
+    }
+
     public SiteViewModel init() {
         search.setValue(null);
         result.setValue(null);
         action.setValue(null);
+        searchFailed.setValue(false);
         return this;
     }
 
@@ -73,7 +80,9 @@ public class SiteViewModel extends ViewModel {
     }
 
     public void searchContent(List<Site> sites, String keyword, boolean quick) {
-        searches.start(sites, site -> SearchTask.create(site, keyword, quick), search::postValue);
+        // 用 postValue 而非 setValue：本方法可能由播放兜底链路(VodFallbackPolicy)在非主线程回调，setValue 会抛异常
+        searchFailed.postValue(false);
+        searches.start(sites, site -> SearchTask.create(site, keyword, quick), search::postValue, () -> searchFailed.postValue(true));
     }
 
     private void execute(TaskType type, MutableLiveData<Result> liveData, Callable<Result> callable) {

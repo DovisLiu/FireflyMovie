@@ -375,6 +375,9 @@ public class VideoActivity extends PlaybackActivity implements VodPlaybackHost, 
         mVod = mViewModel.createPlaybackController(this);
         observeWhenServiceReady(mViewModel.getDetail(), this::onDetailObserved);
         observeWhenServiceReady(mViewModel.getSearch(), this::onSearchObserved);
+        mViewModel.getSearchFailed().observe(this, failed -> {
+            if (Boolean.TRUE.equals(failed)) Notify.show(R.string.search_all_failed);
+        });
         observeWhenServiceReady(mViewModel.getPreload(), this::onPreloadObserved);
         observeWhenServiceReady(mViewModel.getPlayback(), this::onPlaybackObserved);
     }
