@@ -367,6 +367,7 @@
     <string name="crash_copy">Copy error info</string>
     <string name="crash_copied">Error info copied</string>
     <string name="crash_reset">Clear source config and restart</string>
+    <string name="exit_abnormal">Abnormal exit detected last time: %1$s</string>
     <string name="crash_reset_confirm">This will clear all VOD/Live/Wallpaper source configs and restart the app. Continue?</string>
     <string name="crash_reset_done">Source config cleared</string>
 

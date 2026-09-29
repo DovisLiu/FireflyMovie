@@ -14,6 +14,7 @@ import com.fireflymovie.tv.R;
 import com.fireflymovie.tv.db.AppDatabase;
 import com.fireflymovie.tv.databinding.ActivityCrashBinding;
 import com.fireflymovie.tv.ui.base.BaseActivity;
+import com.fireflymovie.tv.utils.ExitInfo;
 import com.fireflymovie.tv.utils.Notify;
 import com.fireflymovie.tv.utils.Task;
 import com.github.catvod.utils.Prefers;
@@ -72,7 +73,7 @@ public class CrashActivity extends BaseActivity {
     }
 
     private void copyError() {
-        String log = CustomActivityOnCrash.getAllErrorDetailsFromIntent(this, getIntent());
+        String log = CustomActivityOnCrash.getAllErrorDetailsFromIntent(this, getIntent()) + "\n\n---- Last process exit records ----\n" + ExitInfo.describe();
         ClipboardManager manager = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
         if (manager == null || TextUtils.isEmpty(log)) return;
         manager.setPrimaryClip(ClipData.newPlainText("crash", log));
