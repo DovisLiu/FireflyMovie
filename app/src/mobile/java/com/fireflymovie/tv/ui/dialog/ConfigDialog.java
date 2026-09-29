@@ -74,7 +74,7 @@ public class ConfigDialog extends BaseAlertDialog {
     protected void initView() {
         binding.name.setText(getConfig().getName());
         binding.url.setText(ori = getConfig().getUrl());
-        binding.input.setVisibility(edit ? View.VISIBLE : View.GONE);
+        binding.input.setVisibility(View.VISIBLE);
         binding.url.setSelection(TextUtils.isEmpty(ori) ? 0 : ori.length());
     }
 
@@ -128,7 +128,7 @@ public class ConfigDialog extends BaseAlertDialog {
         String name = binding.name.getText().toString().trim();
         if (edit) Config.find(ori, type).url(url).name(name).update();
         if (url.isEmpty()) Config.delete(ori, type);
-        ((ConfigListener) requireParentFragment()).setConfig(Config.find(url, type));
+        ((ConfigListener) requireParentFragment()).setConfig(name.isEmpty() ? Config.find(url, type) : Config.find(url, name, type));
         dismiss();
     }
 

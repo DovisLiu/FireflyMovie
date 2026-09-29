@@ -1,14 +1,21 @@
 package com.fireflymovie.tv.ui.activity;
 
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
 import android.os.Bundle;
 import android.text.TextUtils;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.viewbinding.ViewBinding;
 
+import com.fireflymovie.tv.App;
 import com.fireflymovie.tv.R;
+import com.fireflymovie.tv.db.AppDatabase;
 import com.fireflymovie.tv.databinding.ActivityCrashBinding;
 import com.fireflymovie.tv.ui.base.BaseActivity;
+import com.fireflymovie.tv.utils.Notify;
+import com.fireflymovie.tv.utils.Task;
 import com.github.catvod.utils.Prefers;
 
 import java.util.Objects;
@@ -38,6 +45,8 @@ public class CrashActivity extends BaseActivity {
     @Override
     protected void initEvent() {
         mBinding.details.setOnClickListener(v -> showError());
+        mBinding.copy.setOnClickListener(v -> copyError());
+        mBinding.reset.setOnClickListener(v -> confirmReset());
         mBinding.restart.setOnClickListener(v -> CustomActivityOnCrash.restartApplication(this, Objects.requireNonNull(CustomActivityOnCrash.getConfigFromIntent(getIntent()))));
     }
 
@@ -60,5 +69,38 @@ public class CrashActivity extends BaseActivity {
                 .setMessage(CustomActivityOnCrash.getAllErrorDetailsFromIntent(this, getIntent()))
                 .setPositiveButton(R.string.crash_details_close, null)
                 .show();
+    }
+
+    private void copyError() {
+        String log = CustomActivityOnCrash.getAllErrorDetailsFromIntent(this, getIntent());
+        ClipboardManager manager = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+        if (manager == null || TextUtils.isEmpty(log)) return;
+        manager.setPrimaryClip(ClipData.newPlainText("crash", log));
+        Notify.show(R.string.crash_copied);
+    }
+
+    private void confirmReset() {
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.crash_reset)
+                .setMessage(R.string.crash_reset_confirm)
+                .setPositiveButton(R.string.crash_reset, (dialog, which) -> resetConfig())
+                .setNegativeButton(R.string.crash_details_close, null)
+                .show();
+    }
+
+    private void resetConfig() {
+        Task.execute(() -> {
+            AppDatabase.get().getConfigDao().deleteType(0);
+            AppDatabase.get().getConfigDao().deleteType(1);
+            AppDatabase.get().getConfigDao().deleteType(2);
+            Prefers.put("config_0", "");
+            Prefers.put("config_1", "");
+            Prefers.put("config_2", "");
+            Prefers.put("crash", false);
+            App.post(() -> {
+                Notify.show(R.string.crash_reset_done);
+                CustomActivityOnCrash.restartApplication(this, Objects.requireNonNull(CustomActivityOnCrash.getConfigFromIntent(getIntent())));
+            });
+        });
     }
 }

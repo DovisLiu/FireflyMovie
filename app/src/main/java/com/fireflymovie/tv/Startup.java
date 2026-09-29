@@ -1,6 +1,8 @@
 package com.fireflymovie.tv;
 
 import android.content.Context;
+import android.os.Looper;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.startup.Initializer;
@@ -27,10 +29,27 @@ public class Startup implements Initializer<Void> {
     @Override
     public Void create(@NonNull Context context) {
         CaocConfig.Builder.create().trackActivities(true).backgroundMode(CaocConfig.BACKGROUND_MODE_SILENT).errorActivity(CrashActivity.class).apply();
+        hookBackgroundCrashes();
         Logger.addLogAdapter(new AndroidLogAdapter(PrettyFormatStrategy.newBuilder().methodCount(0).showThreadInfo(false).tag("TV").build()));
         EventBus.builder().addIndex(new EventIndex()).installDefaultEventBus();
         OkHttp.dns().setDoh(() -> Doh.objectFrom(Setting.getDoh()));
         return null;
+    }
+
+    /**
+     * 第三方源 jar 常在自己的子线程里抛异常（如 GoProxy 下载 so 失败后 dlopen），
+     * 会直接杀死进程并弹崩溃页，甚至造成启动死循环。
+     * 非主线程的未捕获异常只记录日志、不杀进程；主线程崩溃仍交回原处理器（CAOC）。
+     */
+    private void hookBackgroundCrashes() {
+        Thread.UncaughtExceptionHandler delegate = Thread.getDefaultUncaughtExceptionHandler();
+        Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
+            if (thread != Looper.getMainLooper().getThread()) {
+                Log.e("TV", "Uncaught exception on background thread: " + thread.getName(), throwable);
+                return;
+            }
+            if (delegate != null) delegate.uncaughtException(thread, throwable);
+        });
     }
 
     @NonNull

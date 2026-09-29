@@ -39,4 +39,20 @@
         android:layout_marginTop="8dp"
         android:text="@string/crash_details" />
 
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/copy"
+        style="@style/Widget.Material3.Button.TonalButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="@string/crash_copy" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/reset"
+        style="@style/Widget.Material3.Button.OutlinedButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="@string/crash_reset" />
+
 </androidx.appcompat.widget.LinearLayoutCompat>

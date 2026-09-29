@@ -364,6 +364,11 @@
     <string name="crash_details">错误信息</string>
     <string name="crash_details_title">错误信息</string>
     <string name="crash_details_close">关闭</string>
+    <string name="crash_copy">复制错误信息</string>
+    <string name="crash_copied">错误信息已复制</string>
+    <string name="crash_reset">清除源配置并重启</string>
+    <string name="crash_reset_confirm">将清除全部点播/直播/壁纸源配置并重启应用，继续吗？</string>
+    <string name="crash_reset_done">源配置已清除</string>
 
     <!-- Hint -->
     <string name="copied">已复制</string>
