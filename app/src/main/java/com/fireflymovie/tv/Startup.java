@@ -1,9 +1,15 @@
 package com.fireflymovie.tv;
 
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Application;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.os.Looper;
 import android.os.SystemClock;
 import android.util.Log;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.startup.Initializer;
@@ -46,13 +52,43 @@ public class Startup implements Initializer<Void> {
 
     /**
      * 启动时检查上次进程退出原因（Android 11+ 官方 API）。
-     * 若为异常退出（原生崩溃/信号/ANR 等），记日志并提示一次，便于取证"闪退无崩溃页"类问题。
+     * 若为异常退出（原生崩溃/信号/ANR 等），等首个 Activity 就绪后弹出完整详情对话框
+     * （Toast 显示不全），支持一键复制全部内容，便于取证"闪退无崩溃页"类问题。
      */
     private void reportLastExit() {
         if (!ExitInfo.lastExitAbnormal()) return;
         String info = ExitInfo.describe();
         Log.e("TV", "Last abnormal exit:\n" + info);
-        App.post(() -> Notify.show(App.get().getString(R.string.exit_abnormal, info.split("\n")[0])));
+        App.get().registerActivityLifecycleCallbacks(new Application.ActivityLifecycleCallbacks() {
+            @Override
+            public void onActivityResumed(@NonNull Activity activity) {
+                App.get().unregisterActivityLifecycleCallbacks(this);
+                showExitDialog(activity, info);
+            }
+
+            @Override public void onActivityCreated(@NonNull Activity a, android.os.Bundle b) { }
+            @Override public void onActivityStarted(@NonNull Activity a) { }
+            @Override public void onActivityPaused(@NonNull Activity a) { }
+            @Override public void onActivityStopped(@NonNull Activity a) { }
+            @Override public void onActivitySaveInstanceState(@NonNull Activity a, @NonNull android.os.Bundle b) { }
+            @Override public void onActivityDestroyed(@NonNull Activity a) { }
+        });
+    }
+
+    private void showExitDialog(Context context, String info) {
+        AlertDialog dialog = new AlertDialog.Builder(context)
+                .setTitle(R.string.exit_dialog_title)
+                .setMessage(info)
+                .setPositiveButton(R.string.crash_copy, (d, w) -> {
+                    ClipboardManager cm = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
+                    if (cm != null) cm.setPrimaryClip(ClipData.newPlainText("exit", info));
+                    Notify.show(R.string.crash_copied);
+                })
+                .setNegativeButton(R.string.crash_details_close, null)
+                .create();
+        dialog.show();
+        TextView message = dialog.findViewById(android.R.id.message);
+        if (message != null) message.setTextIsSelectable(true);
     }
 
     /**

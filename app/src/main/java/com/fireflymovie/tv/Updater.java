@@ -64,18 +64,21 @@ public class Updater implements Download.Callback, UpdateListener {
         }
     }
 
-    // 依次尝试各更新源获取版本判定 JSON，任一成功即返回；全部失败则抛出异常
+    // 短路式"有新版即停"：依次问 服务器 → Gitee → GitHub，任一渠道返回比当前版本新的 code 立即采用；
+    // 渠道无响应或返回的不是新版（如服务器忘了同步 JSON）则继续问下一个；全问完取见到的最新一份
     private JSONObject fetchJson() throws Exception {
-        String path = Github.jsonPath(BuildConfig.FLAVOR_mode);
+        JSONObject best = null;
         Exception last = null;
-        for (String host : Github.HOSTS) {
+        for (String url : Github.jsonUrls(BuildConfig.FLAVOR_mode)) {
             try {
-                String content = OkHttp.string(host + path);
-                return new JSONObject(content);
+                JSONObject object = new JSONObject(OkHttp.string(url));
+                if (object.optInt("code") > BuildConfig.VERSION_CODE) return object;
+                if (best == null || object.optInt("code") > best.optInt("code")) best = object;
             } catch (Exception e) {
                 last = e;
             }
         }
+        if (best != null) return best;
         throw last != null ? last : new Exception("update check failed");
     }
 
