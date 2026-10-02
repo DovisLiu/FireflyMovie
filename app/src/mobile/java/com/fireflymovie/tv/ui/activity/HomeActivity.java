@@ -29,6 +29,7 @@ import com.fireflymovie.tv.event.ConfigEvent;
 import com.fireflymovie.tv.event.RefreshEvent;
 import com.fireflymovie.tv.event.ServerEvent;
 import com.fireflymovie.tv.event.StateEvent;
+import com.fireflymovie.tv.NoticeManager;
 import com.fireflymovie.tv.impl.Callback;
 import com.fireflymovie.tv.player.extractor.Source;
 import com.fireflymovie.tv.receiver.ShortcutReceiver;
@@ -57,6 +58,7 @@ public class HomeActivity extends BaseActivity implements NavigationBarView.OnIt
 
     private FragmentStateManager mManager;
     private ActivityHomeBinding mBinding;
+    private NoticeManager mNotice;
     private int orientation;
 
     @Override
@@ -83,7 +85,15 @@ public class HomeActivity extends BaseActivity implements NavigationBarView.OnIt
         PermissionUtil.requestNotify(this);
         initFragment(savedInstanceState);
         Updater.create().start(this);
+        mNotice = NoticeManager.create();
+        mNotice.check(this);
         initConfig();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mNotice.recheck(this);
     }
 
     @Override

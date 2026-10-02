@@ -1,8 +1,11 @@
 package com.fireflymovie.tv.setting;
 
 import com.fireflymovie.tv.R;
+import com.fireflymovie.tv.utils.Formatters;
 import com.fireflymovie.tv.utils.ResUtil;
 import com.github.catvod.utils.Prefers;
+
+import java.time.LocalDate;
 
 public class Setting {
 
@@ -135,5 +138,23 @@ public class Setting {
 
     public static void putZhuyin(boolean zhuyin) {
         Prefers.put("zhuyin", zhuyin);
+    }
+
+    // 迁移公告：最后已知阶段（拉取成功即持久化，断网兜底）
+    public static int getNoticeStage() {
+        return Prefers.getInt("noticeStage", 0);
+    }
+
+    public static void putNoticeStage(int stage) {
+        Prefers.put("noticeStage", stage);
+    }
+
+    // 迁移公告：提示阶段（stage=1）当日是否已弹过
+    public static boolean isNoticeShownToday() {
+        return Prefers.getString("noticeDay").equals(LocalDate.now().format(Formatters.DATE));
+    }
+
+    public static void putNoticeShownToday() {
+        Prefers.put("noticeDay", LocalDate.now().format(Formatters.DATE));
     }
 }

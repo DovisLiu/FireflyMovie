@@ -1,20 +1,29 @@
 package com.fireflymovie.tv.ui.dialog;
 
+import android.app.Activity;
+import android.content.Intent;
+import android.net.Uri;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.viewbinding.ViewBinding;
 
+import com.fireflymovie.tv.R;
 import com.fireflymovie.tv.databinding.DialogRestoreBinding;
 import com.fireflymovie.tv.db.AppDatabase;
 import com.fireflymovie.tv.impl.Callback;
 import com.fireflymovie.tv.ui.adapter.RestoreAdapter;
 import com.fireflymovie.tv.ui.custom.SpaceItemDecoration;
+import com.fireflymovie.tv.utils.FileChooser;
+import com.fireflymovie.tv.utils.Notify;
 
 import java.io.File;
 
@@ -23,6 +32,17 @@ public class RestoreDialog extends BaseBottomSheetDialog implements RestoreAdapt
     private DialogRestoreBinding binding;
     private RestoreAdapter adapter;
     private Callback callback;
+
+    // 导入：系统文件选择器任选位置（网盘/Download/其他设备传来的 .bk.gz），不限于 /sdcard/TV/
+    private final ActivityResultLauncher<Intent> launcher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+        if (result.getResultCode() != Activity.RESULT_OK || result.getData() == null || result.getData().getData() == null) return;
+        String path = FileChooser.getPathFromUri(result.getData().getData());
+        if (TextUtils.isEmpty(path)) {
+            Notify.show(R.string.backup_import_fail);
+            return;
+        }
+        restore(new File(path));
+    });
 
     public static RestoreDialog create() {
         return new RestoreDialog();
@@ -49,9 +69,18 @@ public class RestoreDialog extends BaseBottomSheetDialog implements RestoreAdapt
     }
 
     @Override
-    public void onItemClick(File item) {
-        AppDatabase.restore(item, callback);
+    protected void initEvent() {
+        binding.importButton.setOnClickListener(v -> FileChooser.from(launcher).show());
+    }
+
+    private void restore(File file) {
+        AppDatabase.restore(file, callback);
         dismiss();
+    }
+
+    @Override
+    public void onItemClick(File item) {
+        restore(item);
     }
 
     @Override

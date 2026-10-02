@@ -1,5 +1,6 @@
 package com.fireflymovie.tv.ui.fragment;
 
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -41,13 +42,16 @@ import com.fireflymovie.tv.utils.PermissionUtil;
 import com.fireflymovie.tv.utils.ResUtil;
 import com.github.catvod.bean.Doh;
 import com.github.catvod.net.OkHttp;
+import com.github.catvod.utils.Path;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
+import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class SettingFragment extends BaseFragment implements ConfigListener, SiteListener, LiveListener, ThemeDialog.Listener {
@@ -120,6 +124,7 @@ public class SettingFragment extends BaseFragment implements ConfigListener, Sit
         mBinding.size.setOnClickListener(this::setSize);
         mBinding.cache.setOnClickListener(this::onCache);
         mBinding.backup.setOnClickListener(this::onBackup);
+        mBinding.export.setOnClickListener(this::onExport);
         mBinding.player.setOnClickListener(this::onPlayer);
         mBinding.danmaku.setOnClickListener(this::onDanmaku);
         mBinding.restore.setOnClickListener(this::onRestore);
@@ -322,6 +327,23 @@ public class SettingFragment extends BaseFragment implements ConfigListener, Sit
                 Notify.show(R.string.backup_fail);
             }
         }));
+    }
+
+    // 导出：把 /sdcard/TV/ 下最新的备份文件通过系统分享发出（可发到流光/网盘/其他设备）
+    private void onExport(View view) {
+        PermissionUtil.requestFile(this, allGranted -> {
+            File[] files = Path.tv().listFiles(f -> f.getName().startsWith("tv") && f.getName().endsWith(".bk.gz"));
+            if (files == null || files.length == 0) {
+                Notify.show(R.string.backup_export_none);
+                return;
+            }
+            Arrays.sort(files, (f1, f2) -> Long.compare(f2.lastModified(), f1.lastModified()));
+            Intent send = new Intent(Intent.ACTION_SEND);
+            send.setType("*/*");
+            send.putExtra(Intent.EXTRA_STREAM, FileUtil.getShareUri(files[0]));
+            send.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            startActivity(Intent.createChooser(send, getString(R.string.backup_export)));
+        });
     }
 
     private void onRestore(View view) {

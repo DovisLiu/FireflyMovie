@@ -1,13 +1,23 @@
 package com.fireflymovie.tv.ui.dialog;
 
+import android.app.Activity;
+import android.content.Intent;
+import android.net.Uri;
+import android.text.TextUtils;
+
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.fragment.app.FragmentActivity;
 import androidx.viewbinding.ViewBinding;
 
+import com.fireflymovie.tv.R;
 import com.fireflymovie.tv.databinding.DialogRestoreBinding;
 import com.fireflymovie.tv.db.AppDatabase;
 import com.fireflymovie.tv.impl.Callback;
 import com.fireflymovie.tv.ui.adapter.RestoreAdapter;
 import com.fireflymovie.tv.ui.custom.SpaceItemDecoration;
+import com.fireflymovie.tv.utils.FileChooser;
+import com.fireflymovie.tv.utils.Notify;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import java.io.File;
@@ -17,6 +27,17 @@ public class RestoreDialog extends BaseAlertDialog implements RestoreAdapter.OnC
     private DialogRestoreBinding binding;
     private RestoreAdapter adapter;
     private Callback callback;
+
+    // 导入：系统文件选择器任选位置（网盘/Download/其他设备传来的 .bk.gz），不限于 /sdcard/TV/
+    private final ActivityResultLauncher<Intent> launcher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+        if (result.getResultCode() != Activity.RESULT_OK || result.getData() == null || result.getData().getData() == null) return;
+        String path = FileChooser.getPathFromUri(result.getData().getData());
+        if (TextUtils.isEmpty(path)) {
+            Notify.show(R.string.backup_import_fail);
+            return;
+        }
+        restore(new File(path));
+    });
 
     public static RestoreDialog create() {
         return new RestoreDialog();
@@ -51,8 +72,17 @@ public class RestoreDialog extends BaseAlertDialog implements RestoreAdapter.OnC
     }
 
     @Override
+    protected void initEvent() {
+        binding.importButton.setOnClickListener(v -> FileChooser.from(launcher).show());
+    }
+
+    @Override
     public void onItemClick(File item) {
-        AppDatabase.restore(item, callback);
+        restore(item);
+    }
+
+    private void restore(File file) {
+        AppDatabase.restore(file, callback);
         dismiss();
     }
 
@@ -64,7 +94,7 @@ public class RestoreDialog extends BaseAlertDialog implements RestoreAdapter.OnC
     @Override
     public void onStart() {
         super.onStart();
-        if (adapter.getItemCount() == 0) dismiss();
-        else setWidth(0.4f);
+        // 列表为空不再自动关闭：保留导入入口
+        setWidth(0.4f);
     }
 }

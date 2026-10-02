@@ -358,6 +358,20 @@
     <string name="update_check">Checking for updates…</string>
     <string name="update_confirm">Update</string>
 
+    <!-- Notice -->
+    <string name="notice_title">Important Notice</string>
+    <string name="notice_message">A new version of the app is available. Your data can be migrated with one tap.</string>
+    <string name="notice_stop">This app has stopped updating. Please download the new version to continue. You can back up your data here and restore it in the new app.</string>
+    <string name="notice_confirm">OK</string>
+    <string name="notice_cancel">Cancel</string>
+    <string name="notice_exit">Exit</string>
+
+    <!-- Backup export/import -->
+    <string name="backup_export">Export</string>
+    <string name="backup_import">Import</string>
+    <string name="backup_export_none">No backup file</string>
+    <string name="backup_import_fail">Unsupported file</string>
+
     <!-- Crash -->
     <string name="crash_info">An unexpected error occurred.\nSorry for the inconvenience.</string>
     <string name="crash_restart">Restart app</string>

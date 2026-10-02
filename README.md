@@ -1,9 +1,9 @@
 # 流萤影视 (FireflyMovie)
 
-基于开源 TV 影音聚合生态（上游可追溯至 [CatVod](https://github.com/CatVodTVOfficial/CatVodTVJarLoader) 猫影视）二次开发的 Android 影音应用。保留原功能基础上进行多项工程改造，同时支持 **Android TV 大屏** 与 **手机** 两种使用场景。
+开源的 Android 影音播放应用，同时支持 **Android TV 大屏** 与 **手机** 两种使用场景。
 本项目仅提供播放能力，不包含任何影音内容源，内容源由用户通过外部配置自行扩展。
 
-> 本项目遵循生态上游的 **GPL v3** 许可证（见 [LICENSE.md](LICENSE.md)）。
+> 本项目遵循 **GPL v3** 许可证（见 [LICENSE.md](LICENSE.md)）。
 
 ## 项目信息
 
@@ -109,16 +109,16 @@ export JAVA_HOME="/path/to/your/jdk-21"
 
 ## 许可证
 
-本项目基于开源 TV 影音聚合生态（上游可追溯至 [CatVod](https://github.com/CatVodTVOfficial/CatVodTVJarLoader)）二次开发，遵循 **GPL v3** 许可证。详见 [LICENSE.md](LICENSE.md)。
+本项目遵循 **GPL v3** 许可证。详见 [LICENSE.md](LICENSE.md)。
 
 ## 下载
 
 安装包托管在兄弟仓库 [Release](https://github.com/DovisLiu/Release) 的 `apk/` 目录（不随本仓库分发，避免重复存储）。APK 统一走 GitHub 下载（2026-09-29 起：Gitee 匿名拉取大文件被拒（403）且 APP 无登录环节，故不再向 Gitee 同步 APK；Gitee 仅保留版本检测 JSON 兜底）。
 
-安装包按版本号归档在 `apk/<版本>/` 目录。下方为当前最新版（v1.0.7）：
+安装包按版本号归档在 `apk/<版本>/` 目录。下方为当前最新版（v1.0.8）：
 
 | 版本 | 下载链接 |
 |------|----------|
-| 电视版 64 位 | [leanback-arm64_v8a.apk](https://github.com/DovisLiu/Release/raw/fireflymovie/apk/1.0.7/leanback-arm64_v8a.apk) |
-| 电视版 32 位 | [leanback-armeabi_v7a.apk](https://github.com/DovisLiu/Release/raw/fireflymovie/apk/1.0.7/leanback-armeabi_v7a.apk) |
-| 手机版 64 位 | [mobile-arm64_v8a.apk](https://github.com/DovisLiu/Release/raw/fireflymovie/apk/1.0.7/mobile-arm64_v8a.apk) |
+| 电视版 64 位 | [leanback-arm64_v8a.apk](https://github.com/DovisLiu/Release/raw/fireflymovie/apk/1.0.8/leanback-arm64_v8a.apk) |
+| 电视版 32 位 | [leanback-armeabi_v7a.apk](https://github.com/DovisLiu/Release/raw/fireflymovie/apk/1.0.8/leanback-armeabi_v7a.apk) |
+| 手机版 64 位 | [mobile-arm64_v8a.apk](https://github.com/DovisLiu/Release/raw/fireflymovie/apk/1.0.8/mobile-arm64_v8a.apk) |

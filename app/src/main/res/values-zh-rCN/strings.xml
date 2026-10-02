@@ -358,6 +358,20 @@
     <string name="update_check">正在检测更新…</string>
     <string name="update_confirm">更新</string>
 
+    <!-- Notice -->
+    <string name="notice_title">重要通知</string>
+    <string name="notice_message">应用已全新升级，数据可一键迁移，欢迎体验新版本。</string>
+    <string name="notice_stop">本应用已停止更新，请下载新版本继续使用。您可以先在此备份数据，在新应用中一键恢复继续使用。</string>
+    <string name="notice_confirm">确认</string>
+    <string name="notice_cancel">取消</string>
+    <string name="notice_exit">退出应用</string>
+
+    <!-- Backup export/import -->
+    <string name="backup_export">导出</string>
+    <string name="backup_import">导入</string>
+    <string name="backup_export_none">没有可导出的备份</string>
+    <string name="backup_import_fail">不是有效的备份文件</string>
+
     <!-- Crash -->
     <string name="crash_info">发生意外错误\n抱歉给您带来不便</string>
     <string name="crash_restart">重新启动</string>

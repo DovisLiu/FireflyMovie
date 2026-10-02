@@ -24,4 +24,15 @@ public class Github {
             "https://raw.githubusercontent.com/DovisLiu/Release/fireflymovie/apk/" + version + "/" + name + ".apk"
         };
     }
+
+    // 迁移公告 notice.json 三源：自有服务器 → Gitee → GitHub（与版本检测同序）。
+    // 服务器文件在 firefly/ 根（no-cache）；镜像放 apk/notice.json。
+    // 注意：公告管道地址写死属于流萤自身，流光的下载地址由 notice.json 内容下发（留空间），互不耦合。
+    public static String[] noticeUrls() {
+        return new String[]{
+            SERVER + "/notice.json",
+            "https://gitee.com/dovisliu/Release/raw/fireflymovie/apk/notice.json",
+            "https://raw.githubusercontent.com/DovisLiu/Release/fireflymovie/apk/notice.json"
+        };
+    }
 }

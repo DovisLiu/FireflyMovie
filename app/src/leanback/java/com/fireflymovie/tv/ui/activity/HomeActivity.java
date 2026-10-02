@@ -22,6 +22,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewbinding.ViewBinding;
 
 import com.fireflymovie.tv.App;
+import com.fireflymovie.tv.NoticeManager;
 import com.fireflymovie.tv.Product;
 import com.fireflymovie.tv.R;
 import com.fireflymovie.tv.Updater;
@@ -89,6 +90,7 @@ public class HomeActivity extends BaseActivity implements CustomTitleView.Listen
     private SiteViewModel mViewModel;
     private Result mResult;
     private Clock mClock;
+    private NoticeManager mNotice;
 
     private Site getHome() {
         return VodConfig.get().getHome();
@@ -123,6 +125,8 @@ public class HomeActivity extends BaseActivity implements CustomTitleView.Listen
         PermissionUtil.requestNotify(this);
         DLNARendererService.start(this);
         Updater.create().start(this);
+        mNotice = NoticeManager.create();
+        mNotice.check(this);
         setRecyclerView();
         setViewModel();
         setAdapter();
@@ -455,6 +459,7 @@ public class HomeActivity extends BaseActivity implements CustomTitleView.Listen
     protected void onResume() {
         super.onResume();
         mClock.start();
+        mNotice.recheck(this);
     }
 
     @Override
