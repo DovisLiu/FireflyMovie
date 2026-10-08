@@ -47,7 +47,8 @@ public final class PlayerEngineFactory {
     }
 
     private static boolean isMpvReady() {
-        // Firefly EXO-only: 当前构建缺少 lib-media3-mpvplayer.aar，禁用 MPV 创建路径
-        return false;
+        // media3-mpvplayer AAR 已入 libs（源码 @FongMi/media release-1.11.0-fongmi，2026-10-08 构建验证），
+        // 对应 stub 已自 firefly6stub 移除；libmpv/libplayer so 由 AAR jniLibs 打包
+        return true;
     }
 }

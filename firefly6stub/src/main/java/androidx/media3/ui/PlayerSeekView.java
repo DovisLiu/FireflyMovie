@@ -78,7 +78,7 @@ public class PlayerSeekView extends FrameLayout implements Player.Listener, Time
 
     public PlayerSeekView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
-        LayoutInflater.from(context).inflate(androidx.media3.mpvplayer.R.layout.exo_player_seek_view, this);
+        LayoutInflater.from(context).inflate(com.fireflymovie.tv.stub.R.layout.exo_player_seek_view, this);
         positionView = findViewById(androidx.media3.ui.R.id.exo_position);
         positionView.getClass();
         durationView = findViewById(androidx.media3.ui.R.id.exo_duration);
@@ -86,8 +86,8 @@ public class PlayerSeekView extends FrameLayout implements Player.Listener, Time
         timeBar = findViewById(androidx.media3.ui.R.id.exo_progress);
         timeBar.getClass();
         timeBar.addListener(this);
-        chapterView = findViewById(androidx.media3.mpvplayer.R.id.exo_chapter);
-        chapterSeparator = findViewById(androidx.media3.mpvplayer.R.id.exo_chapter_separator);
+        chapterView = findViewById(com.fireflymovie.tv.stub.R.id.exo_chapter);
+        chapterSeparator = findViewById(com.fireflymovie.tv.stub.R.id.exo_chapter_separator);
         timeTextBuilder = new StringBuilder();
         formatter = new Formatter(timeTextBuilder, Locale.getDefault());
         ticker = this::updateProgress;
@@ -97,9 +97,9 @@ public class PlayerSeekView extends FrameLayout implements Player.Listener, Time
         rootFrame = new Rect();
         timeBarLocation = new int[2];
         rootLocation = new int[2];
-        bubbleMargin = getResources().getDimensionPixelSize(androidx.media3.mpvplayer.R.dimen.exo_chapter_bubble_margin);
-        bubbleScreenInset = getResources().getDimensionPixelSize(androidx.media3.mpvplayer.R.dimen.exo_chapter_bubble_screen_inset);
-        bubbleMaxWidth = getResources().getDimensionPixelSize(androidx.media3.mpvplayer.R.dimen.exo_chapter_bubble_max_width);
+        bubbleMargin = getResources().getDimensionPixelSize(com.fireflymovie.tv.stub.R.dimen.exo_chapter_bubble_margin);
+        bubbleScreenInset = getResources().getDimensionPixelSize(com.fireflymovie.tv.stub.R.dimen.exo_chapter_bubble_screen_inset);
+        bubbleMaxWidth = getResources().getDimensionPixelSize(com.fireflymovie.tv.stub.R.dimen.exo_chapter_bubble_max_width);
         adGroupTimesMs = new long[0];
         adGroupPlayed = new boolean[0];
         chapterTimesMs = new long[0];
@@ -447,7 +447,7 @@ public class PlayerSeekView extends FrameLayout implements Player.Listener, Time
     private TextView getChapterBubbleView() {
         if (chapterBubble == null) {
             chapterBubble = (TextView) LayoutInflater.from(getContext())
-                    .inflate(androidx.media3.mpvplayer.R.layout.exo_chapter_bubble, this, false);
+                    .inflate(com.fireflymovie.tv.stub.R.layout.exo_chapter_bubble, this, false);
         }
         return chapterBubble;
     }

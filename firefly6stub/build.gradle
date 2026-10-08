@@ -3,7 +3,7 @@ plugins {
 }
 
 android {
-    namespace = 'androidx.media3.mpvplayer'
+    namespace "com.fireflymovie.tv.stub"
 
     compileSdk libs.versions.compileSdk.get().toInteger()
 
