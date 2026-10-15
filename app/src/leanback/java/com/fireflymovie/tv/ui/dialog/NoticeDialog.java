@@ -12,13 +12,20 @@ import com.fireflymovie.tv.BuildConfig;
 import com.fireflymovie.tv.R;
 import com.fireflymovie.tv.bean.Notice;
 import com.fireflymovie.tv.databinding.DialogNoticeBinding;
+import com.fireflymovie.tv.utils.Download;
+import com.fireflymovie.tv.utils.FileUtil;
+import com.fireflymovie.tv.utils.Notify;
+import com.github.catvod.utils.Path;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
-public class NoticeDialog extends BaseAlertDialog {
+import java.io.File;
+
+public class NoticeDialog extends BaseAlertDialog implements Download.Callback {
 
     private DialogNoticeBinding binding;
     private Notice notice;
     private int stage;
+    private Download download;
 
     public static NoticeDialog create() {
         return new NoticeDialog();
@@ -54,8 +61,7 @@ public class NoticeDialog extends BaseAlertDialog {
     protected void initView() {
         binding.title.setText(TextUtils.isEmpty(notice.getTitle()) ? getString(R.string.notice_title) : notice.getTitle());
         binding.desc.setText(TextUtils.isEmpty(notice.getMessage()) ? getString(stage >= 3 ? R.string.notice_stop : R.string.notice_message) : notice.getMessage());
-        // 按钮文案默认「确认/取消」，可由 notice.json buttonText/cancelText 覆盖
-        // （新应用名称与叫法由服务器 JSON 决定，APK 内不写死任何新应用名）
+        // 文案（含电视用户说明）由 notice.json 下发，APK 内不写死
         binding.download.setText(TextUtils.isEmpty(notice.getButtonText()) ? getString(R.string.notice_confirm) : notice.getButtonText());
         binding.later.setText(TextUtils.isEmpty(notice.getCancelText()) ? getString(R.string.notice_cancel) : notice.getCancelText());
         binding.later.setVisibility(stage == 1 ? View.VISIBLE : View.GONE);
@@ -72,16 +78,48 @@ public class NoticeDialog extends BaseAlertDialog {
 
     private void download(View view) {
         String url = getFlowUrl();
-        // 下载地址完全由 notice.json 下发；JSON 未配地址时按钮不动作（不写死任何兜底 URL）
         if (TextUtils.isEmpty(url)) return;
-        view.setEnabled(false);
-        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
-        // 停止阶段弹窗常驻：从浏览器返回后 onResume 继续拦截；其余阶段跳转后关闭
+        // 电视端：多数无浏览器/下载器，改为应用内下载 APK 并调起安装器（复用 Updater 的 Download + FileProvider 安装能力）
+        if ("leanback".equals(BuildConfig.FLAVOR_mode)) {
+            startInternalDownload(url);
+        } else {
+            view.setEnabled(false);
+            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
+            if (stage < 3) dismiss();
+        }
+    }
+
+    private void startInternalDownload(String url) {
+        if (download != null) download.cancel();
+        binding.download.setEnabled(false);
+        download = Download.create(url, Path.cache("notice.apk"));
+        download.start(this);
+    }
+
+    @Override
+    public void progress(int value) {
+        if (binding != null) binding.download.setText(value + "%");
+    }
+
+    @Override
+    public void error(String msg) {
+        download = null;
+        if (binding != null) {
+            binding.download.setEnabled(true);
+            binding.download.setText(TextUtils.isEmpty(notice.getButtonText()) ? getString(R.string.notice_confirm) : notice.getButtonText());
+        }
+        Notify.show(msg);
+    }
+
+    @Override
+    public void success(File file) {
+        download = null;
+        FileUtil.openFile(file);
         if (stage < 3) dismiss();
     }
 
     // 下载地址全部由 notice.json 下发（flowApkUrl/flowMobileUrl/flowUrl），不写死：
-    // 流光侧改仓库名/改 JSON 名/改应用名都只需改服务器 JSON，1.0.8 无需再发版
+    // 流光侧改仓库名/改 JSON 名/改应用名都只需改服务器 JSON，1.0.8 及更早版本无需再发版
     private String getFlowUrl() {
         String url = "leanback".equals(BuildConfig.FLAVOR_mode) ? notice.getFlowApkUrl() : notice.getFlowMobileUrl();
         return TextUtils.isEmpty(url) ? notice.getFlowUrl() : url;

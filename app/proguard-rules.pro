@@ -80,3 +80,6 @@
 -keep class com.google.zxing.qrcode.QRCodeReader { *; }
 -keep class com.google.zxing.qrcode.QRCodeWriter { *; }
 -keep class com.google.zxing.qrcode.decoder.ErrorCorrectionLevel { *; }
+
+# NoticeDialog 实现 Download.Callback（电视版应用内下载回调，避免 R8 误删进度/成功/失败方法）
+-keep class com.fireflymovie.tv.utils.Download$Callback { *; }
