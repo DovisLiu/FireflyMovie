@@ -1,10 +1,14 @@
 package com.fireflymovie.tv.ui.dialog;
 
+import android.app.Dialog;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.FragmentActivity;
 import androidx.viewbinding.ViewBinding;
 
@@ -35,8 +39,19 @@ public class NoticeDialog extends BaseAlertDialog {
     }
 
     public NoticeDialog show(FragmentActivity activity) {
+        // DialogFragment 自身持有独立 mCancelable（默认 true），onStart 时会覆盖 AlertDialog.Builder
+        // 的 setCancelable，必须在 DialogFragment 层同步设置，否则 stage>=2 点外部/返回键仍能关闭
+        setCancelable(stage == 1);
         show(activity.getSupportFragmentManager(), null);
         return this;
+    }
+
+    @NonNull
+    @Override
+    public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
+        Dialog dialog = super.onCreateDialog(savedInstanceState);
+        dialog.setCanceledOnTouchOutside(stage == 1);
+        return dialog;
     }
 
     @Override
